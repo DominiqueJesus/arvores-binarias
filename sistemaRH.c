@@ -39,33 +39,61 @@ int validaCPF(int cpf, char opcao[]) {
     return 0;
 }
 
-
-
-T_no *inserirFunc(char nome[], int cpf) {
+T_no *inserirFunc(char nome[], int cpf, T_no *arvoreCPF) {
     T_no *funcionario;
     funcionario = 0;
 
-    if(funcionario) {
-        printf("ERRO: alocação de memória em ponteiro não nulo!");
-    } else {
+    if(!arvoreCPF) {
+        // Alocação de memória para nó da arvore (malloc)
         funcionario = (T_no *)malloc(sizeof(T_no));
         if(!funcionario) {
-            printf("ERRO: Malloc falhou!");
+            printf("\nERRO: Malloc falhou!\n");
             exit(1);
         }
+
+        funcionario->CPF = cpf;
+        strcpy(funcionario->Nome, nome);
+        funcionario->esq = funcionario->dir = NULL;
+
+        return funcionario;
     }
 
-    funcionario->CPF = cpf;
-    strcpy(funcionario->Nome, nome);
-    funcionario->esq = funcionario->dir = NULL;
+    if(arvoreCPF->CPF == cpf) {
+        printf("\nERRO: O CPF informado já está cadastrado.\n");
+        return arvoreCPF;
+    }
 
+    if(arvoreCPF->CPF > cpf) {
+        arvoreCPF->esq = inserirFunc(nome, cpf, arvoreCPF->esq);
+    } else {
+        arvoreCPF->dir = inserirFunc(nome, cpf, arvoreCPF->dir);
+    }
+
+    return arvoreCPF;
 }
 
-int removerFunc() {
+T_no *buscarFunc(int cpf, T_no *arvoreCPF) {
+
+    if(!arvoreCPF) {
+        printf("\nCPF %d não foi localizado\n", cpf);
+        return arvoreCPF;
+    }
     
+    if(arvoreCPF->CPF == cpf) {
+        printf("\nEncontrou: %.50s %d\n", arvoreCPF->Nome, arvoreCPF->CPF);
+        return arvoreCPF;
+    }
+
+    if(arvoreCPF->CPF > cpf) {
+        return buscarFunc(cpf, arvoreCPF->esq);
+    } 
+    else {
+        return buscarFunc(cpf, arvoreCPF->dir);
+    }
+
 }
 
-int buscarFunc() {
+int removerFunc(int cpf, T_no *arvoreCPF) {
     
 }
 
@@ -74,7 +102,7 @@ int listarFunc() {
 }
 
 int sair() {
-    
+    // Lembrar de colocar free() para liberar memória de todos os ponteiros
 }
 
 #define TAM 5
@@ -102,23 +130,52 @@ int main () {
     input("\n", opcao, TAM);
 
         if (opcao[0] == 'i') {
-            input("Por favor, informe o nome do funcionário: ", nome, 50);
-            printf("Por favor, informe o CPF do funcionário (somente os números): ");
+            system("cls");
+            printf("INSERIR FUNCIONÁRIO:\n");
+            input("\nInsira o nome do funcionário: ", nome, 50);
+            printf("\nInsira o CPF do funcionário (somente números): ");
             scanf("%d", &cpf);
-            inserirFunc(nome, cpf);
-            printf("Funcionário registrado com sucesso!");
+            inserirFunc(nome, cpf, arvoreCPF);
+            printf("\nFuncionário inserido com sucesso!\n");
+
+            while (getchar() != '\n');
+            printf("\nPressione ENTER para voltar...\n");
+            getchar();
         } 
         else if (opcao[0] == 'r') {
-            printf("Removendo funcionário...");
+            system("cls");
+            printf("REMOVER FUNCIONÁRIO:\n");
+            printf("\nInsira o CPF do funcionário (somente números): ");
+            scanf("%d", &cpf);
+            removerFunc(cpf, arvoreCPF);
+            printf("\nFuncionário removido com sucesso!\n");
+            
+            while (getchar() != '\n');
+            printf("\nPressione ENTER para voltar...\n");
+            getchar();
         }
         else if (opcao[0] == 'b') {
-            printf("Buscando funcionário...");
+            system("cls");
+            printf("BUSCAR FUNCIONÁRIO:\n");
+            printf("\nInsira o CPF do funcionário (somente números): ");
+            scanf("%d", &cpf);
+            buscarFunc(cpf, arvoreCPF);
+
+            while (getchar() != '\n');
+            printf("\nPressione ENTER para voltar...\n");
+            getchar();
         }
         else if (opcao[0] == 'l') {
-            printf("Listando funcionários...");
+            printf("- LISTA DE FUNCIONÁRIOS -\n");
+            listarFunc();
+
+            while (getchar() != '\n');
+            printf("\nPressione ENTER para voltar...\n");
+            getchar();
         }
         else if (opcao[0] == 's') {
             printf("Saindo...");
+            sair();
         }
         else {
             printf("Opção inválida! Por favor, tente novamente.");
